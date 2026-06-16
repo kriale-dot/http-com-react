@@ -1,24 +1,77 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 
-//4 - custom hook
 export const useFetch = (url) => {
-  const [data, setData] = useState(null);
 
-  useEffect(() => {
+    const [data, setData] = useState(null);
 
-    const fetchData = async () => {
+    // Configuração do POST
+    const [config, setConfig] = useState(null);
+    const [method, setMethod] = useState(null);
 
-      const res = await fetch(url);
+    // Força atualização dos dados
+    const [callFetch, setCallFetch] = useState(false);
 
-      const json = await res.json();
+    // 6 - loading
+    const [loading, setLoading] = useState(false)
 
-      setData(json)
+    // Configuração das requisições
+    const httpConfig = (data, method) => {
+
+        if (method === "POST") {
+
+            setConfig({
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            setMethod(method);
+        }
 
     };
-    fetchData()
 
-  }, url);
+    // Busca os dados
+    useEffect(() => {
 
-  return { data };
+        const fetchData = async () => {
+
+            setLoading(true)
+            const res = await fetch(url);
+
+            const json = await res.json();
+
+            setData(json);
+            setLoading(true)
+
+        };
+
+        fetchData();
+
+    }, [url, callFetch, loading]);
+
+    // Executa POST
+    useEffect(() => {
+
+        const httpRequest = async () => {
+
+            if (method === "POST" && config) {
+
+                const res = await fetch(url, config);
+
+                const json = await res.json();
+
+                setCallFetch(json);
+
+            }
+
+        };
+
+        httpRequest();
+
+    }, [config, method, url]);
+
+    return { data, httpConfig };
 
 };
