@@ -1,77 +1,78 @@
 import { useState, useEffect } from "react";
 
 export const useFetch = (url) => {
+  const [data, setData] = useState(null);
 
-    const [data, setData] = useState(null);
+  const [config, setConfig] = useState(null);
+  const [method, setMethod] = useState(null);
 
-    // Configuração do POST
-    const [config, setConfig] = useState(null);
-    const [method, setMethod] = useState(null);
+  const [callFetch, setCallFetch] = useState(false);
 
-    // Força atualização dos dados
-    const [callFetch, setCallFetch] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    // 6 - loading
-    const [loading, setLoading] = useState(false)
+  const httpConfig = (data, method) => {
+    if (method === "POST") {
+      setConfig({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-    // Configuração das requisições
-    const httpConfig = (data, method) => {
+      setMethod(method);
+    }
+  };
 
-        if (method === "POST") {
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
 
-            setConfig({
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            });
+      try {
+        const res = await fetch(url);
 
-            setMethod(method);
+        if (!res.ok) {
+          throw new Error("Erro ao carregar os dados");
         }
 
+        const json = await res.json();
+
+        setData(json);
+      } catch (error) {
+        console.log(error.message);
+        setError("Houve algum erro ao carregar os dados.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Busca os dados
-    useEffect(() => {
+    fetchData();
+  }, [url, callFetch]);
 
-        const fetchData = async () => {
+  useEffect(() => {
+    const httpRequest = async () => {
+      if (method === "POST" && config) {
+        try {
+          const res = await fetch(url, config);
 
-            setLoading(true)
-            const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error("Erro ao enviar os dados");
+          }
 
-            const json = await res.json();
+          const json = await res.json();
 
-            setData(json);
-            setLoading(true)
+          setCallFetch(json);
+        } catch (error) {
+          console.log(error.message);
+          setError("Houve algum erro ao enviar os dados.");
+        }
+      }
+    };
 
-        };
+    httpRequest();
+  }, [config, method, url]);
 
-        fetchData();
-
-    }, [url, callFetch, loading]);
-
-    // Executa POST
-    useEffect(() => {
-
-        const httpRequest = async () => {
-
-            if (method === "POST" && config) {
-
-                const res = await fetch(url, config);
-
-                const json = await res.json();
-
-                setCallFetch(json);
-
-            }
-
-        };
-
-        httpRequest();
-
-    }, [config, method, url]);
-
-    return { data, httpConfig };
-
+  return { data, httpConfig, loading, error };
 };

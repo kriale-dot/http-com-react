@@ -59,6 +59,16 @@
       "id": "12",
       "name": "Bermuda Jeans",
       "price": 69.9
+    },
+    {
+      "name": "dfsfsd",
+      "price": 4445,
+      "id": "iwttPPWFvrw"
+    },
+    {
+      "name": "gfg",
+      "price": 4545,
+      "id": "cn-ypioyzcY"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

@@ -8,7 +8,7 @@ const url = "http://localhost:3000/products";
 
 function App() {
 
-  const { data: products, httpConfig, loading } = useFetch(url);
+  const { data: products, httpConfig, loading, error } = useFetch(url);
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -35,6 +35,7 @@ function App() {
 
       <h1>Lista de Produtos</h1>
       {loading && <p>carregando dados...</p>}
+      {error && <p>{error}</p>}
       {products && (
         <ul>
           {products.map((product) => (
@@ -70,8 +71,9 @@ function App() {
               onChange={(e) => setPrice(e.target.value)}
             />
           </label>
-
-          <input type="submit" value="Criar Produto" />
+          {/* 7 - state de loading no post */}
+          {loading && <input disabled="true" type="submit" value="Aguarde" />}
+          {!loading && <input type="submit" value="Criar Produto" />}
 
         </form>
 
